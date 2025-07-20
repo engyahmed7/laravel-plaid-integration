@@ -1,0 +1,379 @@
+body {
+    background: linear-gradient(
+        135deg,
+        #667eea 0%,
+        #764ba2 50%,
+        #f093fb 100%
+    ) !important;
+    min-height: 100vh !important;
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+}
+
+body::before {
+    content: "" !important;
+    position: fixed !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 1px,
+        transparent 1px
+    ) !important;
+    background-size: 50px 50px !important;
+    animation: drift 20s linear infinite !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+@keyframes drift {
+    0% {
+        transform: translate(0, 0) !important;
+    }
+
+    100% {
+        transform: translate(50px, 50px) !important;
+    }
+}
+
+.orb {
+    position: fixed !important;
+    border-radius: 50% !important;
+    opacity: 0.7 !important;
+    animation: float 6s ease-in-out infinite !important;
+    pointer-events: none !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.orb1 {
+    width: 200px !important;
+    height: 200px !important;
+    background: radial-gradient(
+        circle,
+        rgba(255, 107, 107, 0.3),
+        rgba(255, 107, 107, 0.1)
+    ) !important;
+    top: 10% !important;
+    left: 80% !important;
+    animation-delay: 0s !important;
+}
+
+.orb2 {
+    width: 150px !important;
+    height: 150px !important;
+    background: radial-gradient(
+        circle,
+        rgba(78, 205, 196, 0.3),
+        rgba(78, 205, 196, 0.1)
+    ) !important;
+    top: 70% !important;
+    left: 10% !important;
+    animation-delay: 2s !important;
+}
+
+.orb3 {
+    width: 100px !important;
+    height: 100px !important;
+    background: radial-gradient(
+        circle,
+        rgba(255, 195, 113, 0.3),
+        rgba(255, 195, 113, 0.1)
+    ) !important;
+    top: 30% !important;
+    left: 20% !important;
+    animation-delay: 4s !important;
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg) !important;
+    }
+
+    33% {
+        transform: translateY(-20px) rotate(120deg) !important;
+    }
+
+    66% {
+        transform: translateY(10px) rotate(240deg) !important;
+    }
+}
+
+.container {
+    position: relative !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0px 15px !important;
+}
+
+.row {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 32px !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+    position: relative !important;
+    animation: slideUp 0.8s ease-out !important;
+    overflow: hidden !important;
+}
+
+@keyframes sl/*ideUp {
+    from {
+        opacity: 0 !important;
+        transform: translateY(50px) !important;
+    }
+
+    to {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+}
+
+.card::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 1px !important;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    ) !important;
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 2rem !important;
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    color: white !important;
+    text-align: center !important;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    position: relative !important;
+}
+
+.card-header::before {
+    content: "🔐" !important;
+    display: block !important;
+    font-size: 3rem !important;
+    margin-bottom: 1rem !important;
+    animation: pulse 2s ease-in-out infinite !important;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1) !important;
+    }
+
+    50% {
+        transform: scale(1.05) !important;
+    }
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+.col-form-label {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px !important;
+    color: white !important;
+    font-size: 1rem !important;
+    padding: 0.875rem 1.25rem !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    outline: none !important;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.form-control.is-invalid {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.invalid-feedback {
+    color: #fecaca !important;
+    font-weight: 500 !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 12px !important;
+    margin-top: 0.5rem !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.form-check {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+.form-check-input {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-check-input:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.form-check-label {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    padding: 1rem 2.5rem !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    border-radius: 50px !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    min-width: 140px !important;
+}
+
+.btn-primary::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    ) !important;
+    transition: left 0.6s !important;
+}
+
+.btn-primary:hover::before {
+    left: 100% !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4) !important;
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+}
+
+.btn-primary:active {
+    transform: translateY(0) !important;
+}
+
+.btn-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+    margin-left: 1rem !important;
+}
+
+.btn-link:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    text-decoration: none !important;
+    transform: translateY(-1px) !important;
+}
+
+.mb-3 {
+    margin-bottom: 2rem !important;
+}
+
+.row.mb-0 {
+    margin-bottom: 0 !important;
+    margin-top: 2rem !important;
+}
+
+.btn-primary:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem !important;
+    }
+
+    .card-header {
+        padding: 1.5rem !important;
+        font-size: 1.5rem !important;
+    }
+
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .btn-primary {
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .btn-link {
+        display: block !important;
+        text-align: center !important;
+        margin-left: 0 !important;
+    }
+}
+
+.form-control:focus,
+.btn-primary:focus,
+.btn-link:focus,
+.form-check-input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+    outline-offset: 2px !important;
+}
