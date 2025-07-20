@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\PlaidController;
 
-Route::middleware('auth')->group(function () {
-    Route::get('/plaid/connect', [PlaidController::class, 'showLinkPage'])->name('plaid.connect');
-    Route::post('/plaid/exchange', [PlaidController::class, 'exchangeToken'])->name('plaid.exchange');
-    Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
+Route::middleware('auth')->prefix('plaid')->group(function () {
+    Route::get('/connect', [PlaidController::class, 'showLinkPage'])->name('plaid.connect');
+    Route::post('/exchange', [PlaidController::class, 'exchangeToken'])->name('plaid.exchange');
+    Route::get('/transactions', [PlaidController::class, 'showTransactions'])->name('plaid.transactions');
 });
+Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 
 Auth::routes();
 
