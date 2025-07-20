@@ -124,9 +124,13 @@
                             </td>
                             <td>
                                 <div class="category-cell">
-                                    @foreach($transaction['category'] ?? [] as $cat)
-                                    <span class="category-tag">{{ $cat }}</span>
-                                    @endforeach
+                                    @if(!empty($transaction['category']))
+                                        @foreach($transaction['category'] as $cat)
+                                            <span class="category-tag">{{ $cat }}</span>
+                                        @endforeach
+                                    @else
+                                            <span class="category-tag">Uncategorized</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
