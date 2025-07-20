@@ -1,515 +1,527 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+body {
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.transactions-container {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.background-effects {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.floating-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.2;
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.orb-1 {
+    top: 80px;
+    left: 80px;
+    width: 288px;
+    height: 288px;
+    background: #8b5cf6;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    top: 160px;
+    right: 80px;
+    width: 288px;
+    height: 288px;
+    background: #ec4899;
+    animation-delay: 2s;
+}
+
+.orb-3 {
+    bottom: -80px;
+    left: 160px;
+    width: 288px;
+    height: 288px;
+    background: #3b82f6;
+    animation-delay: 4s;
+}
+
+.main-content {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.main-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff 0%, #e879f9 50%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: #d1d5db;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
+
+.title-underline {
+    width: 96px;
+    height: 4px;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    margin: 0 auto;
+    border-radius: 2px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-label {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1);
+}
+
+.icon-blue {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+.icon-pink {
+    background: linear-gradient(135deg, #ec4899, #ef4444);
+}
+
+.icon-green {
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.transactions-table-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.table-header {
+    padding: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.title-icon {
+    width: 24px;
+    height: 24px;
+    color: #8b5cf6;
+    margin-right: 0.75rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions-table th {
+    padding: 1rem 2rem;
+    text-align: left;
+    color: #d1d5db;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+.table-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.transactions-table td {
+    padding: 1.5rem 2rem;
+    vertical-align: middle;
+}
+
+.date-cell,
+.merchant-cell {
+    display: flex;
+    align-items: center;
+}
+
+.date-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.table-row:hover .date-icon {
+    transform: scale(1.1);
+}
+
+.date-main {
+    color: white;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.date-relative {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.merchant-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    margin-right: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.table-row:hover .merchant-avatar {
+    transform: scale(1.1);
+}
+
+.merchant-name {
+    color: white;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.merchant-label {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.amount-cell {
+    display: flex;
+    align-items: center;
+}
+
+.amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.amount-tag {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.tag-high {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.tag-low {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+}
+
+.category-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.category-tag {
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.2),
+        rgba(236, 72, 153, 0.2)
+    );
+    color: #e879f9;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    transition: border-color 0.2s ease;
+}
+
+.category-tag:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 5rem 0;
+}
+
+.empty-icon {
+    width: 128px;
+    height: 128px;
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.2),
+        rgba(236, 72, 153, 0.2)
+    );
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.empty-icon .icon {
+    width: 64px;
+    height: 64px;
+    color: #9ca3af;
+}
+
+.empty-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.empty-description {
+    color: #9ca3af;
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+
+.btn-secondary {
+    padding: 0.75rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
 
-    .transactions-container {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
-        position: relative;
-        overflow: hidden;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    .background-effects {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: none;
-    }
-
-    .floating-orb {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(60px);
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
         opacity: 0.2;
-        animation: pulse 4s ease-in-out infinite;
     }
 
-    .orb-1 {
-        top: 80px;
-        left: 80px;
-        width: 288px;
-        height: 288px;
-        background: #8b5cf6;
-        animation-delay: 0s;
+    50% {
+        transform: scale(1.05);
+        opacity: 0.3;
     }
+}
 
-    .orb-2 {
-        top: 160px;
-        right: 80px;
-        width: 288px;
-        height: 288px;
-        background: #ec4899;
-        animation-delay: 2s;
-    }
-
-    .orb-3 {
-        bottom: -80px;
-        left: 160px;
-        width: 288px;
-        height: 288px;
-        background: #3b82f6;
-        animation-delay: 4s;
-    }
-
+@media (max-width: 768px) {
     .main-content {
-        position: relative;
-        z-index: 10;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-
-    .header-section {
-        text-align: center;
-        margin-bottom: 3rem;
-        animation: fadeInUp 0.8s ease-out;
+        padding: 1rem;
     }
 
     .main-title {
-        font-size: 3rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #ffffff 0%, #e879f9 50%, #fbbf24 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 1rem;
-    }
-
-    .subtitle {
-        color: #d1d5db;
-        font-size: 1.125rem;
-        margin-bottom: 1rem;
-    }
-
-    .title-underline {
-        width: 96px;
-        height: 4px;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        margin: 0 auto;
-        border-radius: 2px;
+        font-size: 2rem;
     }
 
     .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .stat-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .stat-card:hover {
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: scale(1.02);
-    }
-
-    .stat-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .stat-label {
-        color: #9ca3af;
-        font-size: 0.875rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-value {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease;
-    }
-
-    .stat-card:hover .stat-icon {
-        transform: scale(1.1);
-    }
-
-    .icon-blue {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    }
-
-    .icon-pink {
-        background: linear-gradient(135deg, #ec4899, #ef4444);
-    }
-
-    .icon-green {
-        background: linear-gradient(135deg, #10b981, #06b6d4);
-    }
-
-    .icon {
-        width: 24px;
-        height: 24px;
-        color: white;
-    }
-
-    .transactions-table-container {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-
-    .table-header {
-        padding: 2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .table-title {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-    }
-
-    .title-icon {
-        width: 24px;
-        height: 24px;
-        color: #8b5cf6;
-        margin-right: 0.75rem;
-    }
-
-    .table-wrapper {
-        overflow-x: auto;
-    }
-
-    .transactions-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .transactions-table th {
-        padding: 1rem 2rem;
-        text-align: left;
-        color: #d1d5db;
-        font-weight: 600;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .table-row {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
-        animation: fadeInUp 0.6s ease-out both;
-    }
-
-    .table-row:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
+    .transactions-table th,
     .transactions-table td {
-        padding: 1.5rem 2rem;
-        vertical-align: middle;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
     }
 
-    /* Table cell styles */
     .date-cell,
     .merchant-cell {
-        display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
 
-    .date-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        transition: transform 0.2s ease;
-    }
-
-    .table-row:hover .date-icon {
-        transform: scale(1.1);
-    }
-
-    .date-main {
-        color: white;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-    }
-
-    .date-relative {
-        color: #9ca3af;
-        font-size: 0.75rem;
-    }
-
+    .date-icon,
     .merchant-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #3b82f6, #06b6d4);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 0.875rem;
-        margin-right: 1rem;
-        transition: transform 0.2s ease;
-    }
-
-    .table-row:hover .merchant-avatar {
-        transform: scale(1.1);
-    }
-
-    .merchant-name {
-        color: white;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-    }
-
-    .merchant-label {
-        color: #9ca3af;
-        font-size: 0.75rem;
-    }
-
-    .amount-cell {
-        display: flex;
-        align-items: center;
+        margin-right: 0;
     }
 
     .amount {
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #10b981, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .amount-tag {
-        margin-left: 0.5rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .tag-high {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-    }
-
-    .tag-low {
-        background: rgba(16, 185, 129, 0.2);
-        color: #6ee7b7;
-    }
-
-    .category-cell {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.25rem;
-    }
-
-    .category-tag {
-        padding: 0.25rem 0.75rem;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-        color: #e879f9;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        border: 1px solid rgba(139, 92, 246, 0.3);
-        transition: border-color 0.2s ease;
-    }
-
-    .category-tag:hover {
-        border-color: rgba(139, 92, 246, 0.5);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 5rem 0;
-    }
-
-    .empty-icon {
-        width: 128px;
-        height: 128px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 2rem;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    .empty-icon .icon {
-        width: 64px;
-        height: 64px;
-        color: #9ca3af;
-    }
-
-    .empty-title {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-
-    .empty-description {
-        color: #9ca3af;
-        font-size: 1.125rem;
-        margin-bottom: 2rem;
+        font-size: 1.25rem;
     }
 
     .empty-actions {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .btn-primary {
-        padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        color: white;
-        font-weight: 600;
-        border: none;
-        border-radius: 0.75rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-primary:hover {
-        transform: scale(1.05);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-    }
-
+    .btn-primary,
     .btn-secondary {
-        padding: 0.75rem 2rem;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        font-weight: 600;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 0.75rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-wrapper {
+        font-size: 0.75rem;
     }
 
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.2);
+    .date-cell,
+    .merchant-cell,
+    .amount-cell,
+    .category-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .amount-tag {
+        margin-left: 0;
+        margin-top: 0.25rem;
     }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            transform: scale(1);
-            opacity: 0.2;
-        }
-
-        50% {
-            transform: scale(1.05);
-            opacity: 0.3;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .main-content {
-            padding: 1rem;
-        }
-
-        .main-title {
-            font-size: 2rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        .transactions-table th,
-        .transactions-table td {
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-        }
-
-        .date-cell,
-        .merchant-cell {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .date-icon,
-        .merchant-avatar {
-            margin-right: 0;
-        }
-
-        .amount {
-            font-size: 1.25rem;
-        }
-
-        .empty-actions {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .btn-primary,
-        .btn-secondary {
-            width: 200px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .table-wrapper {
-            font-size: 0.75rem;
-        }
-
-        .date-cell,
-        .merchant-cell,
-        .amount-cell,
-        .category-cell {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
-        }
-
-        .amount-tag {
-            margin-left: 0;
-            margin-top: 0.25rem;
-        }
-    }
+}

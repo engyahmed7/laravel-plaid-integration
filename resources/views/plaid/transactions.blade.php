@@ -5,6 +5,19 @@
 <link rel="stylesheet" href="{{ asset('css/plaid-transactions.css') }}">
 @endsection
 
+@if(session('success'))
+<div class="alert alert-success">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger">
+    {{ session('error') }}
+</div>
+@endif
+
+
 @section('content')
 <div class="transactions-container">
     <div class="background-effects">
@@ -125,11 +138,11 @@
                             <td>
                                 <div class="category-cell">
                                     @if(!empty($transaction['category']))
-                                        @foreach($transaction['category'] as $cat)
-                                            <span class="category-tag">{{ $cat }}</span>
-                                        @endforeach
+                                    @foreach($transaction['category'] as $cat)
+                                    <span class="category-tag">{{ $cat }}</span>
+                                    @endforeach
                                     @else
-                                            <span class="category-tag">Uncategorized</span>
+                                    <span class="category-tag">Uncategorized</span>
                                     @endif
                                 </div>
                             </td>

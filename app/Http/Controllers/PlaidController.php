@@ -44,7 +44,7 @@ class PlaidController extends Controller
         $accessToken = Auth::user()->plaid_access_token;
 
         if (!$accessToken) {
-            return redirect()->route('plaid.link')->with('error', 'You need to link a bank account first.');
+            return redirect()->route('plaid.connect')->with('error', 'You need to link a bank account first.');
         }
 
         $startDate = Carbon::now()->subDays(30)->toDateString();
