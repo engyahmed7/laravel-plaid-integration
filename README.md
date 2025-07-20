@@ -41,9 +41,8 @@ sequenceDiagram
 -   **Secure Plaid API Integration** using industry-standard practices
 -   **Bank Account Linking** via Plaid Link (client-side interface)
 -   **Transaction Retrieval & Management** from connected accounts
--   **User Authentication System** built with Laravel Breeze
--   **Dashboard for Financial Overview**
--   **Responsive and Modern UI** powered by TailwindCSS
+-   **User Authentication System**
+-   **Responsive and Modern UI** powered by BootstrapCSS
 -   **Ready for Testing & Extensibility** in development and production environments
 
 ---
