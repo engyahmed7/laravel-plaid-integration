@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Plaid Transactions')
+@section('title', 'Transactions Overview')
+
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/plaid-transactions.css') }}">
 @endsection
 
+@section('content')
 @if(session('success'))
 <div class="alert alert-success">
     {{ session('success') }}
@@ -17,8 +19,6 @@
 </div>
 @endif
 
-
-@section('content')
 <div class="transactions-container">
     <div class="background-effects">
         <div class="floating-orb orb-1"></div>

@@ -16,8 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    alert("Bank connected!");
-                    console.log(data);
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert("Something went wrong!");
+                    }
                 });
         },
         onExit: function (err, metadata) {
