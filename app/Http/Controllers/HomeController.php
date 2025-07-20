@@ -23,9 +23,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (!auth()->user()->plaid_access_token) {
-            return redirect()->route('plaid.connect')->with('info', 'Please link your bank account to continue.');
-        }
-        return view('home');
+        return redirect()->route('plaid.connect')->with('info', 'Please link your bank account to continue.');
     }
 }

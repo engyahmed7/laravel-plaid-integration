@@ -128,7 +128,7 @@ body::before {
     overflow: hidden !important;
 }
 
-@keyframes sl/*ideUp {
+@keyframes slideUp {
     from {
         opacity: 0 !important;
         transform: translateY(50px) !important;
