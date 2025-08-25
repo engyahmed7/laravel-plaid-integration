@@ -50,6 +50,8 @@ Route::prefix('payout-demo')->group(function () {
     Route::get('/onboard-refresh', [PayoutDemoController::class, 'onboardRefresh'])->name('payout-demo.onboard-refresh');
     Route::post('/transfer', [PayoutDemoController::class, 'transfer'])->name('payout-demo.transfer');
     Route::get('/transfers', [PayoutDemoController::class, 'getTransfers'])->name('payout-demo.transfers');
+    Route::get('/car-owner-dashboard', [PayoutDemoController::class, 'carOwnerDashboard'])->name('payout-demo.car-owner-dashboard');
+    Route::get('/dashboard-refresh', [PayoutDemoController::class, 'dashboardRefresh'])->name('payout-demo.dashboard-refresh');
 });
 
 Auth::routes();

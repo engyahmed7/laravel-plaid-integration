@@ -216,6 +216,51 @@ class StripeConnectService
     }
 
     /**
+     * Create dashboard link for connected account
+     */
+    public function createDashboardLink(string $accountId)
+    {
+        try {
+            $accountLink = AccountLink::create([
+                'account' => $accountId,
+                'refresh_url' => url('/payout-demo/dashboard-refresh?account_id=' . $accountId),
+                'return_url' => url('/payout-demo'),
+                'type' => 'account_onboarding',
+            ]);
+
+            return [
+                'success' => true,
+                'url' => $accountLink->url,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Create login link for connected account dashboard
+     */
+    public function createLoginLink(string $accountId)
+    {
+        try {
+            $loginLink = Account::createLoginLink($accountId);
+
+            return [
+                'success' => true,
+                'url' => $loginLink->url,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * List transfers for an account
      */
     public function listTransfers(string $accountId = null, int $limit = 10)

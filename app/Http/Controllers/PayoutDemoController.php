@@ -164,4 +164,26 @@ class PayoutDemoController extends Controller
 
         return response()->json($transfers);
     }
+
+    public function carOwnerDashboard(Request $request)
+    {
+        $account = ConnectedAccount::findOrFail($request->account_id);
+        
+        if (!$account->onboarded) {
+            return redirect('/payout-demo')->with('error', 'Account not fully onboarded yet');
+        }
+
+        $result = $this->stripeConnect->createLoginLink($account->stripe_account_id);
+        
+        if ($result['success']) {
+            return redirect($result['url']);
+        }
+
+        return redirect('/payout-demo')->with('error', 'Failed to create dashboard link');
+    }
+
+    public function dashboardRefresh(Request $request)
+    {
+        return redirect('/payout-demo')->with('info', 'Dashboard session refreshed');
+    }
 }
