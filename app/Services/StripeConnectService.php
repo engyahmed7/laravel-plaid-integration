@@ -152,18 +152,47 @@ class StripeConnectService
     }
 
     /**
-     * Create instant payout to bank account
+     * Get available bank accounts for connected account
      */
-    public function createInstantPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [])
+    public function getExternalAccounts(string $accountId)
     {
         try {
-            $payout = Payout::create([
+            $account = Account::retrieve($accountId);
+            $externalAccounts = $account->external_accounts->all(['object' => 'bank_account']);
+            
+            return [
+                'success' => true,
+                'accounts' => $externalAccounts->data,
+                'default_account' => $account->default_for_currency['usd'] ?? null,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Create instant payout to bank account
+     */
+    public function createInstantPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [], string $bankAccountId = null)
+    {
+        try {
+            $payoutData = [
                 'amount' => $amountCents,
                 'currency' => $currency,
                 'method' => 'instant',
                 'description' => $metadata['description'] ?? 'Instant payout to bank',
                 'metadata' => $metadata,
-            ], [
+            ];
+
+            // Specify destination bank account if provided
+            if ($bankAccountId) {
+                $payoutData['destination'] = $bankAccountId;
+            }
+
+            $payout = Payout::create($payoutData, [
                 'stripe_account' => $accountId,
             ]);
 

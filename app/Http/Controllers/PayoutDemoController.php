@@ -168,13 +168,13 @@ class PayoutDemoController extends Controller
     public function carOwnerDashboard(Request $request)
     {
         $account = ConnectedAccount::findOrFail($request->account_id);
-        
+
         if (!$account->onboarded) {
             return redirect('/payout-demo')->with('error', 'Account not fully onboarded yet');
         }
 
         $result = $this->stripeConnect->createLoginLink($account->stripe_account_id);
-        
+
         if ($result['success']) {
             return redirect($result['url']);
         }
@@ -185,5 +185,34 @@ class PayoutDemoController extends Controller
     public function dashboardRefresh(Request $request)
     {
         return redirect('/payout-demo')->with('info', 'Dashboard session refreshed');
+    }
+
+    public function getBankAccounts(Request $request, $account_id)
+    {
+        $account = ConnectedAccount::findOrFail($account_id);
+        // dd($account);
+        $result = $this->stripeConnect->getExternalAccounts($account->stripe_account_id);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'bank_accounts' => array_map(function ($account) {
+                    dd($account);
+                    return [
+                        'id' => $account->id,
+                        'name' => $account->first_name,
+                        'bank_name' => $account->bank_name ?? 'Unknown Bank',
+                        'account_holder_name' => $account->account_holder_name === null ? 'Unknown Holder' : $account->account_holder_name,
+                        'fingerprint' => $account->fingerprint ?? 'Unknown Fingerprint',
+                        'last4' => $account->last4,
+                        'currency' => $account->currency,
+                        'default_for_currency' => $account->default_for_currency ?? false,
+                    ];
+                }, $result['accounts']),
+                'default_account' => $result['default_account'],
+            ]);
+        }
+
+        return response()->json(['success' => false, 'error' => $result['error']], 400);
     }
 }

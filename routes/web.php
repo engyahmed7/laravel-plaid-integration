@@ -52,6 +52,7 @@ Route::prefix('payout-demo')->group(function () {
     Route::get('/transfers', [PayoutDemoController::class, 'getTransfers'])->name('payout-demo.transfers');
     Route::get('/car-owner-dashboard', [PayoutDemoController::class, 'carOwnerDashboard'])->name('payout-demo.car-owner-dashboard');
     Route::get('/dashboard-refresh', [PayoutDemoController::class, 'dashboardRefresh'])->name('payout-demo.dashboard-refresh');
+    Route::get('/bank-accounts/{account_id}', [PayoutDemoController::class, 'getBankAccounts'])->name('payout-demo.bank-accounts');
 });
 
 Auth::routes();
