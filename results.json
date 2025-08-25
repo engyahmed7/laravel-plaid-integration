@@ -1,0 +1,72 @@
+{
+    "success": true,
+    "transfer_id": "tr_1Rzv74DYODLtkxhtGbhkkFJm",
+    "payout_id": "po_1Rzv77DdOjiSOqkfRd5BDNnZ",
+    "transfer": {
+        "Stripe\\Transfer": {
+            "id": "tr_1Rzv74DYODLtkxhtGbhkkFJm",
+            "object": "transfer",
+            "amount": 50000,
+            "amount_reversed": 0,
+            "balance_transaction": "txn_1Rzv74DYODLtkxhtcMeY0ti0",
+            "created": 1756108006,
+            "currency": "usd",
+            "description": "3 days",
+            "destination": "acct_1Rzuz1DdOjiSOqkf",
+            "destination_payment": "py_1Rzv74DdOjiSOqkflsKth7dx",
+            "livemode": false,
+            "metadata": {
+                "customer_name": "test testttt",
+                "description": "3 days",
+                "rental_id": "RNT-33-291"
+            },
+            "reversals": {
+                "object": "list",
+                "data": [],
+                "has_more": false,
+                "total_count": 0,
+                "url": "/v1/transfers/tr_1Rzv74DYODLtkxhtGbhkkFJm/reversals"
+            },
+            "reversed": false,
+            "source_transaction": null,
+            "source_type": "card",
+            "transfer_group": null
+        }
+    },
+    "payout": {
+        "Stripe\\Payout": {
+            "id": "po_1Rzv77DdOjiSOqkfRd5BDNnZ",
+            "object": "payout",
+            "amount": 50000,
+            "application_fee": null,
+            "application_fee_amount": null,
+            "arrival_date": 1756108009,
+            "automatic": false,
+            "balance_transaction": "txn_1Rzv77DdOjiSOqkfuiHnRN6T",
+            "created": 1756108009,
+            "currency": "usd",
+            "description": "3 days",
+            "destination": "ba_1Rzv12DdOjiSOqkfFnWPGZBE",
+            "failure_balance_transaction": null,
+            "failure_code": null,
+            "failure_message": null,
+            "livemode": false,
+            "metadata": {
+                "customer_name": "test testttt",
+                "description": "3 days",
+                "rental_id": "RNT-33-291"
+            },
+            "method": "instant",
+            "original_payout": null,
+            "payout_method": null,
+            "reconciliation_status": "not_applicable",
+            "reversed_by": null,
+            "source_type": "card",
+            "statement_descriptor": null,
+            "status": "pending",
+            "trace_id": { "status": "pending", "value": null },
+            "type": "bank_account"
+        }
+    },
+    "payout_error": null
+}

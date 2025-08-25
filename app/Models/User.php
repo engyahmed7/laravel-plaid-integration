@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'plaid_access_token',
+        'stripe_customer_id',
     ];
 
     /**
@@ -45,5 +45,60 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function bankConnections()
+    {
+        return $this->hasMany(BankConnection::class);
+    }
+
+    public function bankAccounts()
+    {
+        return $this->hasManyThrough(BankAccount::class, BankConnection::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasManyThrough(Transaction::class, BankConnection::class);
+    }
+
+    public function shopRentals()
+    {
+        return $this->hasMany(Rental::class, 'shop_owner_id');
+    }
+
+    public function customerRentals()
+    {
+        return $this->hasMany(Rental::class, 'customer_id');
+    }
+
+    public function carOwnerRentals()
+    {
+        return $this->hasMany(Rental::class, 'car_owner_id');
+    }
+
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class, 'car_owner_id');
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(Payout::class, 'car_owner_id');
+    }
+
+    public function incidents()
+    {
+        return $this->hasMany(Incident::class, 'customer_id');
+    }
+
+    public function securityDepositHolds()
+    {
+        return $this->hasMany(SecurityDepositHold::class, 'customer_id');
+    }
+
+    public function billingInvoices()
+    {
+        return $this->hasManyThrough(BillingInvoice::class, Rental::class, 'shop_owner_id');
     }
 }

@@ -64,4 +64,26 @@ class PlaidService
 
         return $response->json();
     }
+
+    public function getAccounts($accessToken)
+    {
+        $response = Http::post("{$this->baseUrl()}/accounts/get", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+        ]);
+
+        return $response->json();
+    }
+
+    public function getItem($accessToken)
+    {
+        $response = Http::post("{$this->baseUrl()}/item/get", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+        ]);
+
+        return $response->json();
+    }
 }
