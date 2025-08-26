@@ -1,62 +1,96 @@
-# Laravel Plaid Integration Project
+# Laravel Plaid + Stripe Integration Project
 
-> A robust and secure integration between **Laravel** and the **Plaid API**, enabling users to connect bank accounts, retrieve financial data, and manage transactions seamlessly.
+> A robust and secure integration between **Laravel**, **Plaid API**, and **Stripe API**, enabling users to link bank accounts, process card or ACH payments, and transfer payouts to car owners.
 
-![Laravel](https://img.shields.io/badge/Laravel-12.x-red?style=flat-square&logo=laravel) ![Plaid](https://img.shields.io/badge/Plaid-Sandbox-blue?style=flat-square) ![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue?style=flat-square&logo=php)
+![Laravel](https://img.shields.io/badge/Laravel-12.x-red?style=flat-square\&logo=laravel) ![Plaid](https://img.shields.io/badge/Plaid-Sandbox-blue?style=flat-square) ![Stripe](https://img.shields.io/badge/Stripe-Integration-purple?style=flat-square\&logo=stripe) ![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue?style=flat-square\&logo=php)
 
 ---
 
-## Plaid Integration Flow
+## System Flow
+
+### 1. **Card Payments (Pay-In via Stripe)**
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant Laravel
+    participant Stripe
+
+    Customer->>Laravel: Provide Card Info
+    Laravel->>Stripe: Create Payment Method (Card)
+    Stripe-->>Laravel: Payment Method ID
+    Laravel->>Stripe: Create Payment Intent
+    Stripe-->>Laravel: Payment Confirmation
+    Laravel-->>Customer: Payment Success
+```
+
+---
+
+### 2. **Bank Account Pay-In (Plaid + Stripe ACH Debit)**
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Laravel
-    participant PlaidAPI
+    participant Plaid
+    participant Stripe
 
-    User->>Laravel: Request Link Token
-    Laravel->>PlaidAPI: POST /link/token/create
-    PlaidAPI-->>Laravel: Link Token
+    User->>Laravel: Request Plaid Link Token
+    Laravel->>Plaid: POST /link/token/create
+    Plaid-->>Laravel: Link Token
     Laravel-->>User: Return Link Token
 
-    User->>PlaidAPI: Open Link Interface
-    PlaidAPI-->>User: Bank Selection UI
-    User->>PlaidAPI: Select Bank & Credentials
-    PlaidAPI-->>User: Public Token
-
+    User->>Plaid: Select Bank & Authenticate
+    Plaid-->>User: Public Token
     User->>Laravel: Send Public Token
-    Laravel->>PlaidAPI: POST /item/public_token/exchange
-    PlaidAPI-->>Laravel: Access Token
-    Laravel->>Database: Store Access Token
 
-    Laravel->>PlaidAPI: GET /transactions
-    PlaidAPI-->>Laravel: Transaction Data
-    Laravel-->>User: Display Transactions
+    Laravel->>Plaid: Exchange Public Token for Access Token & Account Info
+    Plaid-->>Laravel: Bank Account Details
+    Laravel->>Stripe: Create Bank Account Payment Method
+    Stripe-->>Laravel: Payment Method ID
+    Laravel->>Stripe: Create Payment Intent (ACH Debit)
+```
+
+---
+
+### 3. **Merchant Payout to Car Owners (Stripe Payout)**
+
+```mermaid
+sequenceDiagram
+    participant Merchant
+    participant Laravel
+    participant Stripe
+    participant CarOwner
+
+    Laravel->>Stripe: Create Connected Account for Car Owner
+    Laravel->>Stripe: Initiate Payout
+    Stripe-->>CarOwner: Funds Deposited to Bank
 ```
 
 ---
 
 ## Key Features
 
--   **Secure Plaid API Integration** using industry-standard practices
--   **Bank Account Linking** via Plaid Link (client-side interface)
--   **Transaction Retrieval & Management** from connected accounts
--   **User Authentication System**
--   **Responsive and Modern UI** powered by BootstrapCSS
--   **Ready for Testing & Extensibility** in development and production environments
+* **Plaid Integration** for secure bank account linking
+* **Stripe Pay-In** with:
+
+  * Credit/Debit cards
+  * ACH debits via Plaid-linked bank accounts
+* **Stripe Payouts** to car owners’ bank accounts
+* **Transaction Management Dashboard**
+* **Secure API-first architecture**
+* **Responsive UI** built with BootstrapCSS
 
 ---
 
 ## Prerequisites
 
-Before getting started, ensure you have the following installed:
-
--   **PHP** 8.1+
--   **Composer**
--   **Node.js** 16+
--   **npm** or **yarn**
--   **MySQL 5.7+** or compatible database
--   **Plaid API Credentials** (Client ID and Secret)
+* **PHP** 8.1+
+* **Composer**
+* **Node.js** 16+
+* **MySQL** 5.7+
+* **Plaid API credentials**
+* **Stripe API keys** (secret & publishable)
 
 ---
 
@@ -104,6 +138,9 @@ DB_PASSWORD=your_db_password
 PLAID_CLIENT_ID=your_plaid_client_id
 PLAID_SECRET=your_plaid_secret
 PLAID_ENV=sandbox # or development/production
+
+STRIPE_KEY=your_stripe_publishable_key
+STRIPE_SECRET=your_stripe_secret_key
 ```
 
 7. Run migrations:
@@ -114,60 +151,37 @@ php artisan migrate
 
 ---
 
-## Configuration
-
-### Plaid Setup
-
-1. Create a free account at [Plaid Dashboard](https://dashboard.plaid.com/)
-2. Obtain your **Client ID** and **Secret** from the dashboard
-3. Set the correct environment (`sandbox`, `development`, or `production`) in `.env`
-
----
-
 ## Usage
 
-1. Start the development server:
+### **Card Pay-In**
 
-```bash
-php artisan serve
-```
+1. Create a Stripe customer
+2. Add a payment method (card)
+3. Create a payment intent to charge the customer
 
-2. Visit `http://localhost:8000/register` to create a new account
+### **Bank Account Pay-In via Plaid**
 
-3. Navigate to the **Connect Bank Account** page
+1. Use Plaid Link to connect a bank account
+2. Exchange the public token for bank account info
+3. Create a Stripe payment method of type `us_bank_account`
+4. Create a Stripe payment intent to debit the bank account
 
-4. Click **Connect with Plaid** to initiate the bank linking process
+### **Payout to Car Owners**
 
-5. Select your financial institution and authenticate securely
-
-6. View your transactions and financial data in real-time on the dashboard
+1. Create a Stripe connected account for the owner
+2. Initiate payout using `Stripe::payouts->create()`
 
 ---
 
-## Project Structure
+## Development Notes
 
-```
-app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── PlaidController.php
-│   │   └── ...
-├── Services/
-│   └── PlaidService.php
-resources/
-├── views/
-│   ├── plaid/
-│   │   └── connect.blade.php
-│   └── layouts/
-│       └── app.blade.php
-public/
-├── css/
-│   └── plaid-index.css
-├── js/
-│   └── plaid-link.js
-routes/
-└── web.php
-```
+> ⚠️ This project uses **Plaid’s Sandbox Environment** and **Stripe test mode** by default for development and testing.
+
+For **production deployment**, follow these steps:
+
+1. Replace sandbox credentials with production keys
+2. Set `PLAID_ENV=production` in `.env`
+3. Complete Plaid's **production onboarding process**
 
 ---
 
@@ -186,19 +200,8 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## Notes
-
-> ⚠️ This project uses **Plaid’s Sandbox Environment** by default for development and testing.
-
-For **production deployment**, follow these steps:
-
-1. Replace sandbox credentials with production keys
-2. Set `PLAID_ENV=production` in `.env`
-3. Complete Plaid's **production onboarding process**
-
----
 
 ## Learn More
-
-For detailed documentation on the Plaid API, visit:
-🔗 [Plaid API Documentation](https://plaid.com/docs/)
+For detailed documentation, visit:
+* [Plaid Docs](https://plaid.com/docs/)
+* [Stripe Docs](https://stripe.com/docs)
