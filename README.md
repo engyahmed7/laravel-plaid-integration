@@ -99,8 +99,8 @@ sequenceDiagram
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/engyahmed7/laravel-plaid-integration.git
-cd laravel-plaid-integration
+git clone https://github.com/engyahmed7/laravel-plaid-to-stripe-payments.git
+cd laravel-plaid-to-stripe-payments
 ```
 
 2. Install PHP dependencies:
