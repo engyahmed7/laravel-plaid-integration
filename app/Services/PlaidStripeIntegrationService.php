@@ -53,7 +53,6 @@ class PlaidStripeIntegrationService
         DB::beginTransaction();
 
         try {
-            // Exchange public token for access token
             $exchangeResponse = $this->plaidService->exchangePublicToken($publicToken);
 
             if (!$exchangeResponse || !isset($exchangeResponse['access_token'])) {
@@ -63,10 +62,8 @@ class PlaidStripeIntegrationService
             $accessToken = $exchangeResponse['access_token'];
             $itemId = $exchangeResponse['item_id'];
 
-            // Create or get Stripe customer
             $stripeCustomer = $this->getOrCreateStripeCustomer($user);
 
-            // Create bank connection record
             $bankConnection = BankConnection::create([
                 'user_id' => $user->id,
                 'plaid_access_token' => $accessToken,
@@ -78,7 +75,6 @@ class PlaidStripeIntegrationService
                 'status' => 'active',
             ]);
 
-            // Sync accounts and create payment methods
             $this->syncBankAccounts($bankConnection);
 
             DB::commit();
@@ -105,7 +101,6 @@ class PlaidStripeIntegrationService
     public function syncBankAccounts(BankConnection $bankConnection)
     {
         try {
-            // Get accounts from Plaid
             $accountsResponse = $this->plaidService->getAccounts($bankConnection->plaid_access_token);
 
             if (!$accountsResponse || !isset($accountsResponse['accounts'])) {
@@ -205,7 +200,7 @@ class PlaidStripeIntegrationService
 
             $paymentMethod = $this->stripeService->createBankAccountPaymentMethod(
                 $bankConnection->stripe_customer_id,
-                '415-555-0011', // In production, use real account number from verification
+                '415-555-0011',
                 $bankAccount->routing_number,
                 $stripeAccountType,
                 $user->name
@@ -286,7 +281,7 @@ class PlaidStripeIntegrationService
             [
                 'bank_connection_id' => $bankConnection->id,
                 'bank_account_id' => $bankAccount->id,
-                'amount' => -$plaidTransaction['amount'], // Plaid uses positive for debits
+                'amount' => -$plaidTransaction['amount'],
                 'currency_code' => $plaidTransaction['iso_currency_code'] ?? 'USD',
                 'description' => $plaidTransaction['name'],
                 'merchant_name' => $plaidTransaction['merchant_name'] ?? null,
@@ -312,13 +307,10 @@ class PlaidStripeIntegrationService
 
     protected function mapAccountTypeForStripe(string $accountType, ?string $accountSubtype = null): string
     {
-        // Map Plaid account types/subtypes to Stripe account types
-        // Stripe only accepts 'checking' or 'savings'
 
         $lowerAccountType = strtolower($accountType);
         $lowerSubtype = $accountSubtype ? strtolower($accountSubtype) : null;
 
-        // Check subtype first for more specific mapping
         if ($lowerSubtype) {
             switch ($lowerSubtype) {
                 case 'checking':
@@ -330,12 +322,10 @@ class PlaidStripeIntegrationService
                 case 'certificate of deposit':
                     return 'savings';
                 default:
-                    // Fall through to account type mapping
                     break;
             }
         }
 
-        // Map based on account type
         switch ($lowerAccountType) {
             case 'depository':
             case 'checking':
@@ -343,7 +333,6 @@ class PlaidStripeIntegrationService
             case 'savings':
                 return 'savings';
             default:
-                // Default to checking for unknown types
                 return 'checking';
         }
     }

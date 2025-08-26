@@ -93,10 +93,6 @@ class StripeService
         //     'amounts' => $amounts,
         // ]);
 
-        try {
-            // For US bank accounts, verification is typically done through micro-deposits
-            // This is a simplified implementation - in practice, you'd use Stripe's
-            // verification flow which involves confirming micro-deposits
 
             return true;
         } catch (Exception $e) {
@@ -123,12 +119,11 @@ class StripeService
                 ],
             ]);
 
-            // Add invoice items
             foreach ($billingInvoice->invoiceItems as $item) {
                 \Stripe\InvoiceItem::create([
                     'invoice' => $invoice->id,
                     'customer' => $customer->id,
-                    'amount' => (int)($item->total_price * 100), // Convert to cents
+                    'amount' => (int)($item->total_price * 100),
                     'currency' => 'usd',
                     'description' => $item->description,
                     'metadata' => [
@@ -153,9 +148,8 @@ class StripeService
         try {
             $customer = $this->getCustomer($billingInvoice->rental->customer->stripe_customer_id);
 
-            // Create payment intent
             $paymentIntent = \Stripe\PaymentIntent::create([
-                'amount' => (int)($billingInvoice->total_amount * 100), // Convert to cents
+                'amount' => (int)($billingInvoice->total_amount * 100),
                 'currency' => 'usd',
                 'customer' => $customer->id,
                 'description' => "Payment for Invoice #{$billingInvoice->invoice_number}",
@@ -192,7 +186,7 @@ class StripeService
             ];
 
             if ($amount) {
-                $refundData['amount'] = (int)($amount * 100); // Convert to cents
+                $refundData['amount'] = (int)($amount * 100);
             }
 
             $refund = \Stripe\Refund::create($refundData);
@@ -211,12 +205,10 @@ class StripeService
         try {
             $paymentMethod = PaymentMethod::retrieve($paymentMethodId);
 
-            // Attach to customer if not already attached
             if (!$paymentMethod->customer) {
                 $paymentMethod->attach(['customer' => $customerId]);
             }
 
-            // Set as default payment method
             Customer::update($customerId, [
                 'invoice_settings' => [
                     'default_payment_method' => $paymentMethodId,
@@ -260,9 +252,6 @@ class StripeService
     public function placeSecurityDepositHold($securityDepositHold)
     {
         try {
-            // This would create a payment intent for the security deposit
-            // In a real implementation, you'd need to get the customer's payment method
-            // For now, we'll just return a mock success
             return (object)['id' => 'pi_security_' . $securityDepositHold->id, 'status' => 'succeeded'];
         } catch (Exception $e) {
             throw new Exception('Failed to place security deposit hold: ' . $e->getMessage());
@@ -275,9 +264,6 @@ class StripeService
     public function releaseSecurityDepositHold($securityDepositHold)
     {
         try {
-            // This would create a payment intent for the security deposit
-            // In a real implementation, you'd need to get the customer's payment method
-            // For now, we'll just return a mock success
             return (object)['id' => 'pi_security_' . $securityDepositHold->id, 'status' => 'succeeded'];
         } catch (Exception $e) {
             throw new Exception('Failed to release security deposit hold: ' . $e->getMessage());
@@ -290,9 +276,6 @@ class StripeService
     public function chargeCustomerForRap($customer, $amount)
     {
         try {
-            // This would create a payment intent for the RAP charge
-            // In a real implementation, you'd need to get the customer's payment method
-            // For now, we'll just return a mock success
             return (object)['id' => 'pi_rap_' . $customer->id, 'status' => 'succeeded'];
         } catch (Exception $e) {
             throw new Exception('Failed to charge customer for RAP: ' . $e->getMessage());
@@ -305,9 +288,7 @@ class StripeService
     public function chargeCustomerForCancellation($customer, $amount)
     {
         try {
-            // This would create a payment intent for the cancellation charge
-            // In a real implementation, you'd need to get the customer's payment method
-            // For now, we'll just return a mock success
+
             return (object)['id' => 'pi_cancellation_' . $customer->id, 'status' => 'succeeded'];
         } catch (Exception $e) {
             throw new Exception('Failed to charge customer for cancellation: ' . $e->getMessage());

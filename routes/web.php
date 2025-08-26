@@ -10,6 +10,7 @@ use App\Http\Controllers\StripeController;
 
 use App\Http\Controllers\PlaidController;
 use App\Http\Controllers\PayoutDemoController;
+use App\Http\Controllers\PayinDemoController;
 
 Route::middleware('auth')->prefix('plaid')->group(function () {
     Route::get('/connect', [PlaidController::class, 'showLinkPage'])->name('plaid.connect');
@@ -55,6 +56,19 @@ Route::prefix('payout-demo')->group(function () {
     Route::get('/bank-accounts/{account_id}', [PayoutDemoController::class, 'getBankAccounts'])->name('payout-demo.bank-accounts');
     Route::post('/bank-accounts/{account_id}', [PayoutDemoController::class, 'addBankAccount'])->name('payout-demo.add-bank-account');
     Route::post('/cards/{account_id}', [PayoutDemoController::class, 'addCard'])->name('payout-demo.add-card');
+});
+
+// Pay-in Demo routes (Customer payments to merchant)
+Route::prefix('payin-demo')->group(function () {
+    Route::get('/', [PayinDemoController::class, 'dashboard'])->name('payin-demo.dashboard');
+    Route::post('/customer', [PayinDemoController::class, 'createCustomer'])->name('payin-demo.create-customer');
+    Route::post('/payment-method', [PayinDemoController::class, 'createPaymentMethod'])->name('payin-demo.create-payment-method');
+    Route::get('/payment-methods', [PayinDemoController::class, 'getCustomerPaymentMethods'])->name('payin-demo.payment-methods');
+    Route::post('/process-payment', [PayinDemoController::class, 'processPayment'])->name('payin-demo.process-payment');
+    Route::get('/payments', [PayinDemoController::class, 'getPayments'])->name('payin-demo.payments');
+    Route::post('/refund', [PayinDemoController::class, 'refundPayment'])->name('payin-demo.refund');
+    Route::get('/transactions', [PayinDemoController::class, 'getAllTransactions']);
+
 });
 
 Auth::routes();

@@ -394,12 +394,10 @@
             container.appendChild(toast);
             toasts.push(toast);
 
-            // Show toast with animation
             setTimeout(() => {
                 toast.classList.add('show');
             }, 100);
 
-            // Auto remove
             if (duration > 0) {
                 setTimeout(() => {
                     removeToast(toast);
@@ -461,7 +459,6 @@
                             });
                     });
 
-                // Transfer Form
                 $('#transfer-form').on('submit', function(e) {
                     e.preventDefault();
 
@@ -498,7 +495,6 @@
                     });
                 });
 
-                // Load recent transfers
                 function loadRecentTransfers() {
                     $.get('/payout-demo/transfers', function(transfers) {
                         const container = $('#recent-transfers');
@@ -531,7 +527,6 @@
                     });
                 }
 
-                // Load transfers on page load
                 $(document).ready(function() {
                     loadRecentTransfers();
                 });

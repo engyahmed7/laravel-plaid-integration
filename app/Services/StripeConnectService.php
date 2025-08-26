@@ -294,7 +294,6 @@ class StripeConnectService
                 'metadata' => $metadata,
             ];
 
-            // Specify destination bank account if provided
             if ($destinationId) {
                 $payoutData['destination'] = $destinationId;
             }
