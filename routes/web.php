@@ -49,10 +49,12 @@ Route::prefix('payout-demo')->group(function () {
     Route::get('/onboard-return', [PayoutDemoController::class, 'onboardReturn'])->name('payout-demo.onboard-return');
     Route::get('/onboard-refresh', [PayoutDemoController::class, 'onboardRefresh'])->name('payout-demo.onboard-refresh');
     Route::post('/transfer', [PayoutDemoController::class, 'transfer'])->name('payout-demo.transfer');
-    Route::get('/transfers', [PayoutDemoController::class, 'getTransfers'])->name('payout-demo.transfers');
+    Route::get('/transfers/{accountId}', [PayoutDemoController::class, 'getTransfers'])->name('payout-demo.transfers');
     Route::get('/car-owner-dashboard', [PayoutDemoController::class, 'carOwnerDashboard'])->name('payout-demo.car-owner-dashboard');
     Route::get('/dashboard-refresh', [PayoutDemoController::class, 'dashboardRefresh'])->name('payout-demo.dashboard-refresh');
     Route::get('/bank-accounts/{account_id}', [PayoutDemoController::class, 'getBankAccounts'])->name('payout-demo.bank-accounts');
+    Route::post('/bank-accounts/{account_id}', [PayoutDemoController::class, 'addBankAccount'])->name('payout-demo.add-bank-account');
+    Route::post('/cards/{account_id}', [PayoutDemoController::class, 'addCard'])->name('payout-demo.add-card');
 });
 
 Auth::routes();

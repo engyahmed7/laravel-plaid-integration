@@ -104,6 +104,8 @@ class PayoutDemoController extends Controller
             'account_id' => 'required|exists:connected_accounts,id',
             'amount' => 'required|numeric|min:0.50',
             'description' => 'string|max:255',
+            'destination_id' => 'string|nullable',
+            'destination_type' => 'string|in:bank,card|nullable',
         ]);
 
         $account = ConnectedAccount::findOrFail($request->account_id);
@@ -113,6 +115,7 @@ class PayoutDemoController extends Controller
         }
 
         $amountCents = intval($request->amount * 100);
+        $destinationId = $request->destination_id;
 
         $result = $this->stripeConnect->transferAndPayout(
             $account->stripe_account_id,
@@ -122,7 +125,10 @@ class PayoutDemoController extends Controller
                 'description' => $request->description ?? 'Car rental payment',
                 'customer_name' => $account->full_name,
                 'rental_id' => $request->rental_id ?? null,
-            ]
+                'destination_type' => $request->destination_type ?? 'bank',
+
+            ],
+            $destinationId
         );
 
         if (!$result['success']) {
@@ -155,15 +161,52 @@ class PayoutDemoController extends Controller
         ]);
     }
 
-    public function getTransfers()
-    {
-        $transfers = TransferRecord::with('connectedAccount')
-            ->orderBy('created_at', 'desc')
-            ->limit(50)
-            ->get();
+    // public function getTransfers()
+    // {
+    //     $transfers = TransferRecord::with('connectedAccount')
+    //         ->orderBy('created_at', 'desc')
+    //         ->limit(50)
+    //         ->get();
 
-        return response()->json($transfers);
+    //     return response()->json($transfers);
+    // }
+    // public function getTransfers()
+    // {
+    //     $result = $this->stripeConnect->getAllConnectedAccountsTransactions(50, [
+    //         'type' => 'transfer'
+    //     ]);
+
+    //     return response()->json($result);
+    // }
+    public function getTransfers(Request $request, $accountId = null)
+    {
+        try {
+            $limit = $request->get('limit', 50);
+
+            if ($accountId) {
+                Log::info('Fetching transfers for account: ' . $accountId);
+                $transfers = \Stripe\Transfer::all([
+                    'destination' => $accountId,
+                    'limit' => $limit,
+                ]);
+            } else {
+                $transfers = \Stripe\Transfer::all([
+                    'limit' => $limit
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $transfers->data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 400);
+        }
     }
+
 
     public function carOwnerDashboard(Request $request)
     {
@@ -197,7 +240,7 @@ class PayoutDemoController extends Controller
             return response()->json([
                 'success' => true,
                 'bank_accounts' => array_map(function ($account) {
-                    dd($account);
+                    // dd($account);
                     return [
                         'id' => $account->id,
                         'name' => $account->first_name,
@@ -208,8 +251,86 @@ class PayoutDemoController extends Controller
                         'currency' => $account->currency,
                         'default_for_currency' => $account->default_for_currency ?? false,
                     ];
-                }, $result['accounts']),
+                }, $result['bank_accounts']),
+                'cards' => array_map(function ($card) {
+                    return [
+                        'id' => $card->id,
+                        'brand' => $card->brand,
+                        'last4' => $card->last4,
+                        'exp_month' => $card->exp_month,
+                        'exp_year' => $card->exp_year,
+                        'name' => $card->name,
+                    ];
+                }, $result['cards']),
                 'default_account' => $result['default_account'],
+            ]);
+        }
+
+        return response()->json(['success' => false, 'error' => $result['error']], 400);
+    }
+
+
+    public function addBankAccount(Request $request, $account_id)
+    {
+        $request->validate([
+            'account_number' => 'required|string',
+            'routing_number' => 'required|string',
+            'account_holder_name' => 'required|string',
+            'account_holder_type' => 'string|in:individual,company',
+        ]);
+
+        $account = ConnectedAccount::findOrFail($account_id);
+
+        $result = $this->stripeConnect->addBankAccount($account->stripe_account_id, [
+            'account_number' => $request->account_number,
+            'routing_number' => $request->routing_number,
+            'account_holder_name' => $request->account_holder_name,
+            'account_holder_type' => $request->account_holder_type ?? 'individual',
+            'country' => $request->country ?? 'US',
+            'currency' => $request->currency ?? 'usd',
+        ]);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'bank_account_id' => $result['bank_account_id'],
+                'message' => 'Bank account added successfully',
+            ]);
+        }
+
+        return response()->json(['success' => false, 'error' => $result['error']], 400);
+    }
+
+    public function addCard(Request $request, $account_id)
+    {
+        $request->validate([
+            'number' => 'required|string',
+            'exp_month' => 'required|integer|between:1,12',
+            'exp_year' => 'required|integer|min:' . date('Y'),
+            'cvc' => 'required|string|size:3',
+            'name' => 'required|string',
+        ]);
+
+        $account = ConnectedAccount::findOrFail($account_id);
+
+        $result = $this->stripeConnect->addCard($account->stripe_account_id, [
+            'number' => $request->number,
+            'exp_month' => $request->exp_month,
+            'exp_year' => $request->exp_year,
+            'cvc' => $request->cvc,
+            'name' => $request->name,
+            'address_line1' => $request->address_line1,
+            'address_city' => $request->address_city,
+            'address_state' => $request->address_state,
+            'address_zip' => $request->address_zip,
+            'address_country' => $request->address_country ?? 'US',
+        ]);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'card_id' => $result['card_id'],
+                'message' => 'Card added successfully',
             ]);
         }
 

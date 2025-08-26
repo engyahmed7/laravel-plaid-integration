@@ -6,6 +6,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Car Rental Payout System</title>
+
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        /* Toast Base Styles */
+        .toast {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.hide {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        /* Toast Types */
+        .toast.success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+
+        /* Toast Icon */
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Toast Content */
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 16px;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        /* Close Button */
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 12px;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        /* Progress Bar */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            width: 100%;
+            transform-origin: left;
+        }
+
+        /* Demo Button */
+        .demo-section {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .toast {
+                transform: translateY(-100px);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+
+            .toast.hide {
+                transform: translateY(-100px);
+            }
+        }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -188,85 +342,175 @@
     </div>
 
     <script>
-        // Setup CSRF token for AJAX requests
+        let toasts = [];
+
+        function getToastContainer() {
+            let container = document.getElementById('toastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+
+        function createToast(type, title, message, duration = 5000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'ℹ',
+                warning: '⚠'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || '•'}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
+                ${duration > 0 ? '<div class="toast-progress"></div>' : ''}
+            `;
+
+            if (duration > 0) {
+                const progressBar = toast.querySelector('.toast-progress');
+                setTimeout(() => {
+                    progressBar.style.transform = 'scaleX(0)';
+                    progressBar.style.transition = `transform ${duration}ms linear`;
+                }, 100);
+            }
+
+            return toast;
+        }
+
+        function showToast(type, title, message, duration = 5000) {
+            const container = getToastContainer();
+            const toast = createToast(type, title, message, duration);
+
+            container.appendChild(toast);
+            toasts.push(toast);
+
+            // Show toast with animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Auto remove
+            if (duration > 0) {
+                setTimeout(() => {
+                    removeToast(toast);
+                }, duration);
+            }
+
+            return toast;
+        }
+
+        function removeToast(toast) {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+                toasts = toasts.filter(t => t !== toast);
+            }, 400);
+        }
+
+        function showSuccess(title, message, duration = 5000) {
+            return showToast('success', title, message, duration);
+        }
+
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        // Create Customer Form
         $('#create-customer-form').on('submit', function(e) {
-            e.preventDefault();
+                    e.preventDefault();
 
-            const formData = {
-                email: $('input[name="email"]').val(),
-                first_name: $('input[name="first_name"]').val(),
-                last_name: $('input[name="last_name"]').val(),
-                country: $('select[name="country"]').val()
-            };
+                    const formData = {
+                        email: $('input[name="email"]').val(),
+                        first_name: $('input[name="first_name"]').val(),
+                        last_name: $('input[name="last_name"]').val(),
+                        country: $('select[name="country"]').val()
+                    };
 
-            $.ajax({
-                url: '/payout-demo/customer',
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    alert('Customer created! Redirecting to Stripe onboarding...');
-                    window.open(response.onboard_url, '_blank');
-                },
-                error: function(xhr) {
-                    const error = xhr.responseJSON?.error || 'Failed to create customer';
-                    alert('Error: ' + error);
-                }
-            });
-        });
+                    $.ajax({
+                            url: '/payout-demo/customer',
+                            method: 'POST',
+                            data: formData,
+                            success: function(response) {
+                                showSuccess(
+                                    'Customer Created Successfully!',
+                                    'Redirecting to Stripe onboarding in a new tab...'
+                                );
+                                setTimeout(function() {
+                                    window.open(response.onboard_url, '_blank');
+                                }, 1000);             },
+                                error: function(xhr) {
+                                    const error = xhr.responseJSON?.error || 'Failed to create customer';
+                                    alert('Error: ' + error);
+                                }
+                            });
+                    });
 
-        // Transfer Form
-        $('#transfer-form').on('submit', function(e) {
-            e.preventDefault();
+                // Transfer Form
+                $('#transfer-form').on('submit', function(e) {
+                    e.preventDefault();
 
-            const formData = {
-                account_id: $('select[name="account_id"]').val(),
-                amount: parseFloat($('input[name="amount"]').val()),
-                description: $('input[name="description"]').val(),
-                rental_id: $('input[name="rental_id"]').val()
-            };
+                    const formData = {
+                        account_id: $('select[name="account_id"]').val(),
+                        amount: parseFloat($('input[name="amount"]').val()),
+                        description: $('input[name="description"]').val(),
+                        rental_id: $('input[name="rental_id"]').val()
+                    };
 
-            $.ajax({
-                url: '/payout-demo/transfer',
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    let message = `Payment of $${response.amount} sent successfully!\n`;
-                    if (response.payout_id) {
-                        message += `✅ Money sent directly to their bank account!`;
-                    } else {
-                        message += `⏳ Money in their Stripe balance (will auto-payout)`;
-                    }
-                    alert(message);
-                    $('#transfer-form')[0].reset();
-                    loadRecentTransfers();
-                },
-                error: function(xhr) {
-                    const error = xhr.responseJSON?.error || 'Failed to send transfer';
-                    alert('Error: ' + error);
-                }
-            });
-        });
+                    $.ajax({
+                        url: '/payout-demo/transfer',
+                        method: 'POST',
+                        data: formData,
+                        success: function(response) {
+                            let message = `Payment of $${response.amount} sent successfully!\n`;
+                            if (response.payout_id) {
+                                message += `✅ Money sent directly to their bank account!`;
+                            } else {
+                                message += `⏳ Money in their Stripe balance (will auto-payout)`;
+                            }
+                            // alert(message);
+                            showSuccess(
+                                'Transfer Successful!',
+                                message
+                            );
+                            $('#transfer-form')[0].reset();
+                            loadRecentTransfers();
+                        },
+                        error: function(xhr) {
+                            const error = xhr.responseJSON?.error || 'Failed to send transfer';
+                            alert('Error: ' + error);
+                        }
+                    });
+                });
 
-        // Load recent transfers
-        function loadRecentTransfers() {
-            $.get('/payout-demo/transfers', function(transfers) {
-                const container = $('#recent-transfers');
-                container.empty();
+                // Load recent transfers
+                function loadRecentTransfers() {
+                    $.get('/payout-demo/transfers', function(transfers) {
+                        const container = $('#recent-transfers');
+                        container.empty();
 
-                if (transfers.length === 0) {
-                    container.html('<p class="text-gray-500">No transfers yet.</p>');
-                    return;
-                }
+                        if (transfers.length === 0) {
+                            container.html('<p class="text-gray-500">No transfers yet.</p>');
+                            return;
+                        }
 
-                transfers.slice(0, 10).forEach(function(transfer) {
-                    const transferElement = `
+                        transfers.slice(0, 10).forEach(function(transfer) {
+                            const transferElement = `
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div>
@@ -282,15 +526,15 @@
                             </div>
                         </div>
                     `;
-                    container.append(transferElement);
-                });
-            });
-        }
+                            container.append(transferElement);
+                        });
+                    });
+                }
 
-        // Load transfers on page load
-        $(document).ready(function() {
-            loadRecentTransfers();
-        });
+                // Load transfers on page load
+                $(document).ready(function() {
+                    loadRecentTransfers();
+                });
     </script>
 </body>
 

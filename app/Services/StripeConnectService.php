@@ -7,7 +7,10 @@ use Stripe\Account;
 use Stripe\Transfer;
 use Stripe\AccountLink;
 use Stripe\Payout;
+use App\Models\ConnectedAccount;
+use Stripe\BalanceTransaction;
 use Exception;
+
 
 class StripeConnectService
 {
@@ -33,7 +36,7 @@ class StripeConnectService
                 'settings' => [
                     'payouts' => [
                         'schedule' => [
-                            'interval' => 'manual', 
+                            'interval' => 'manual',
                         ],
                     ],
                 ],
@@ -49,6 +52,33 @@ class StripeConnectService
                 'success' => true,
                 'account_id' => $account->id,
                 'account' => $account,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+    public function payoutToCard(string $accountId, string $cardId, int $amountCents, string $currency = 'usd', array $metadata = [])
+    {
+        try {
+            $payout = Payout::create([
+                'amount' => $amountCents,
+                'currency' => $currency,
+                'method' => 'instant',
+                'destination' => $cardId,
+                'description' => $metadata['description'] ?? 'Instant payout to debit card',
+                'metadata' => $metadata,
+            ], [
+                'stripe_account' => $accountId,
+            ]);
+
+            return [
+                'success' => true,
+                'payout_id' => $payout->id,
+                'payout' => $payout,
+                'destination_type' => 'card',
             ];
         } catch (Exception $e) {
             return [
@@ -151,6 +181,73 @@ class StripeConnectService
         }
     }
 
+
+    public function addBankAccount(string $accountId, array $bankData)
+    {
+        try {
+            $account = Account::retrieve($accountId);
+            $bankAccount = $account->external_accounts->create([
+                'external_account' => [
+                    'object' => 'bank_account',
+                    'account_number' => $bankData['account_number'],
+                    'routing_number' => $bankData['routing_number'],
+                    'country' => $bankData['country'] ?? 'US',
+                    'currency' => $bankData['currency'] ?? 'usd',
+                    'account_holder_name' => $bankData['account_holder_name'],
+                    'account_holder_type' => $bankData['account_holder_type'] ?? 'individual',
+                ],
+            ]);
+
+            return [
+                'success' => true,
+                'bank_account_id' => $bankAccount->id,
+                'bank_account' => $bankAccount,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Add card to connected account
+     */
+    public function addCard(string $accountId, array $cardData)
+    {
+        try {
+            $account = Account::retrieve($accountId);
+            $card = $account->external_accounts->create([
+                'external_account' => [
+                    'object' => 'card',
+                    'number' => $cardData['number'],
+                    'exp_month' => $cardData['exp_month'],
+                    'exp_year' => $cardData['exp_year'],
+                    'cvc' => $cardData['cvc'],
+                    'name' => $cardData['name'],
+                    'address_line1' => $cardData['address_line1'] ?? null,
+                    'address_city' => $cardData['address_city'] ?? null,
+                    'address_state' => $cardData['address_state'] ?? null,
+                    'address_zip' => $cardData['address_zip'] ?? null,
+                    'address_country' => $cardData['address_country'] ?? 'US',
+                ],
+            ]);
+
+            return [
+                'success' => true,
+                'card_id' => $card->id,
+                'card' => $card,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+
     /**
      * Get available bank accounts for connected account
      */
@@ -158,8 +255,18 @@ class StripeConnectService
     {
         try {
             $account = Account::retrieve($accountId);
-            $externalAccounts = $account->external_accounts->all(['object' => 'bank_account']);
-            
+            $allExternalAccounts = $account->external_accounts->all();
+
+            $bankAccounts = [];
+            $cards = [];
+
+            foreach ($allExternalAccounts->data as $externalAccount) {
+                if ($externalAccount->object === 'bank_account') {
+                    $bankAccounts[] = $externalAccount;
+                } elseif ($externalAccount->object === 'card') {
+                    $cards[] = $externalAccount;
+                }
+            }
             return [
                 'success' => true,
                 'accounts' => $externalAccounts->data,
@@ -176,7 +283,7 @@ class StripeConnectService
     /**
      * Create instant payout to bank account
      */
-    public function createInstantPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [], string $bankAccountId = null)
+    public function createInstantPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [], string $destinationId = null)
     {
         try {
             $payoutData = [
@@ -188,8 +295,8 @@ class StripeConnectService
             ];
 
             // Specify destination bank account if provided
-            if ($bankAccountId) {
-                $payoutData['destination'] = $bankAccountId;
+            if ($destinationId) {
+                $payoutData['destination'] = $destinationId;
             }
 
             $payout = Payout::create($payoutData, [
@@ -212,22 +319,18 @@ class StripeConnectService
     /**
      * Transfer and instant payout (combined operation)
      */
-    public function transferAndPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [])
+    public function transferAndPayout(string $accountId, int $amountCents, string $currency = 'usd', array $metadata = [], string $destinationId = null)
     {
         try {
-            // First, transfer to connected account
             $transferResult = $this->transferToCustomer($accountId, $amountCents, $currency, $metadata);
 
             if (!$transferResult['success']) {
                 return $transferResult;
             }
 
-            // Wait a moment for transfer to settle
             sleep(2);
 
-            // Then create instant payout to their bank
-            $payoutResult = $this->createInstantPayout($accountId, $amountCents, $currency, $metadata);
-
+            $payoutResult = $this->createInstantPayout($accountId, $amountCents, $currency, $metadata, $destinationId);
             return [
                 'success' => true,
                 'transfer_id' => $transferResult['transfer_id'],
@@ -310,6 +413,56 @@ class StripeConnectService
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get all transactions for all connected accounts
+     */
+
+    public function getAllConnectedAccountsTransactions(int $limit = 50, array $filters = [])
+    {
+        $results = [];
+
+        try {
+            $connectedAccounts = ConnectedAccount::all();
+
+            foreach ($connectedAccounts as $account) {
+                try {
+                    $params = array_merge(['limit' => $limit], $filters);
+
+                    $transactions = BalanceTransaction::all(
+                        $params,
+                        ['stripe_account' => $account->stripe_account_id]
+                    );
+
+                    foreach ($transactions->data as $transaction) {
+                        $results[] = [
+                            'account_id' => $account->stripe_account_id,
+                            'amount'     => $transaction->amount,
+                            'currency'   => $transaction->currency,
+                            'status'     => $transaction->status,
+                            'type'       => $transaction->type,
+                            'created'    => $transaction->created,
+                        ];
+                    }
+                } catch (Exception $e) {
+                    $results[] = [
+                        'account_id' => $account->stripe_account_id,
+                        'error'      => $e->getMessage(),
+                    ];
+                }
+            }
+
+            return [
+                'success' => true,
+                'data'    => $results,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error'   => $e->getMessage(),
             ];
         }
     }
