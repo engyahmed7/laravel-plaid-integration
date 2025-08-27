@@ -278,4 +278,20 @@ class PayinDemoController extends Controller
         }
     }
 
+    function retrieveTransaction(Request $request, $id)
+    {
+        try {
+            $transaction = $this->stripe->paymentIntents->retrieve($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $transaction,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 400);
+        }
+    }
 }

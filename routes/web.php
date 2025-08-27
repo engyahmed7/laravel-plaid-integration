@@ -68,7 +68,7 @@ Route::prefix('payin-demo')->group(function () {
     Route::get('/payments', [PayinDemoController::class, 'getPayments'])->name('payin-demo.payments');
     Route::post('/refund', [PayinDemoController::class, 'refundPayment'])->name('payin-demo.refund');
     Route::get('/transactions', [PayinDemoController::class, 'getAllTransactions']);
-
+    Route::get('/transactions/{id}', [PayinDemoController::class, 'retrieveTransaction'])->name('payin-demo.transactions.retrieve');
 });
 
 Auth::routes();
