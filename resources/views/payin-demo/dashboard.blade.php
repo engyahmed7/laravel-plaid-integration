@@ -155,6 +155,9 @@
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://js.stripe.com/v3/"></script>
+
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -220,7 +223,7 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                             placeholder="cus_xxxxxxxxxxxxx">
                     </div>
-                    <div class="mb-4">
+                    {{-- <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
                         <input type="text" name="number" required placeholder="4242424242424242"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -242,11 +245,18 @@
                             <input type="text" name="cvc" required placeholder="123"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                         </div>
-                    </div>
-                    <div class="mb-4">
+                    </div> --}}
+                    {{-- <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
                         <input type="text" name="name" required placeholder="John Doe"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div> --}}
+                    <div class="mb-4">
+                        <div id="card-element"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div id="card-errors" class="text-red-500 mt-2"></div>
+
                     </div>
                     <button type="submit"
                         class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -315,6 +325,8 @@
                                 Description</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Date</th>
+                                {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th> --}}
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -353,6 +365,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $payment->created_at->format('M d, Y H:i') }}
                                 </td>
+                                {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <form action="{{ route('payin-demo.refund', $payment->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Refund</button>
+                                    </form>
+                                </td> --}}
                             </tr>
                         @endforeach
                     </tbody>
@@ -447,6 +465,13 @@
             return showToast('error', title, message, duration);
         }
 
+        const stripe = Stripe("{{ env('STRIPE_PUBLISHABLE_KEY') }}");
+        const elements = stripe.elements();
+
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -484,37 +509,46 @@
         });
 
         // Payment Method Form
-        $('#payment-method-form').on('submit', function(e) {
+        $('#payment-method-form').on('submit', async function(e) {
             e.preventDefault();
 
-            const formData = {
-                customer_id: $('#payment-method-form input[name="customer_id"]').val(),
-                card_type: 'visa',
-                number: $('input[name="number"]').val(),
-                exp_month: $('input[name="exp_month"]').val(),
-                exp_year: $('input[name="exp_year"]').val(),
-                cvc: $('input[name="cvc"]').val(),
-                name: $('#payment-method-form input[name="name"]').val()
-            };
+            const customerId = $('#payment-method-form input[name="customer_id"]').val();
+            const name = $('#payment-method-form input[name="name"]').val();
 
-            console.log(formData);
+            const {
+                paymentMethod,
+                error
+            } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: cardElement,
+                billing_details: {
+                    name: name
+                },
+            });
+
+            if (error) {
+                showError('Error', error.message);
+                return;
+            }
+
             $.ajax({
                 url: '/payin-demo/payment-method',
                 method: 'POST',
-                data: formData,
+                data: {
+                    customer_id: customerId,
+                    payment_method_id: paymentMethod.id
+                },
                 success: function(response) {
                     showSuccess(
                         'Payment Method Added!',
                         `Card ending in ${response.last4} (${response.brand})`
                     );
                     $('#payment-method-form')[0].reset();
-
                     $('input[name="payment_method_id"]').val(response.payment_method_id);
                 },
                 error: function(xhr) {
-                    console.log(xhr);
-                    const error = xhr.responseJSON?.error || 'Failed to add payment method';
-                    showError('Error', error);
+                    const errorMsg = xhr.responseJSON?.error || 'Failed to add payment method';
+                    showError('Error', errorMsg);
                 }
             });
         });

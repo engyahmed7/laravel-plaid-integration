@@ -64,40 +64,31 @@ class PayinDemoController extends Controller
     {
         $request->validate([
             'customer_id' => 'required|string',
-            'card_type'   => 'required|string|in:visa,visa_debit,mastercard,amex,discover,diners,jcb,unionpay',
-            'name'        => 'required|string',
+            'payment_method_id' => 'required|string',
         ]);
 
-        $testMethods = [
-            'visa'        => 'pm_card_visa',
-            'visa_debit'  => 'pm_card_visa_debit',
-            'mastercard'  => 'pm_card_mastercard',
-            'amex'        => 'pm_card_amex',
-            'discover'    => 'pm_card_discover',
-            'diners'      => 'pm_card_diners',
-            'jcb'         => 'pm_card_jcb',
-            'unionpay'    => 'pm_card_unionpay',
-        ];
-
         try {
-            $pmId = $testMethods[$request->card_type] ?? 'pm_card_visa';
+            $this->stripe->paymentMethods->attach(
+                $request->payment_method_id,
+                ['customer' => $request->customer_id]
+            );
 
-            $this->stripe->paymentMethods->attach($pmId, [
-                'customer' => $request->customer_id,
-            ]);
+            $pm = $this->stripe->paymentMethods->retrieve($request->payment_method_id);
 
             return response()->json([
                 'success' => true,
-                'payment_method_id' => $pmId,
-                'message' => 'Test payment method attached successfully',
+                'payment_method_id' => $pm->id,
+                'last4' => $pm->card->last4,
+                'brand' => $pm->card->brand
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 400);
         }
     }
+
     public function getCustomerPaymentMethods(Request $request)
     {
         $request->validate([
@@ -214,19 +205,40 @@ class PayinDemoController extends Controller
         }
     }
 
-    public function refundPayment(Request $request)
+    public function refundPayment(Request $request, $id)
     {
         $request->validate([
-            'payment_id' => 'required|exists:payment_records,id',
             'amount' => 'nullable|numeric|min:0.01',
             'reason' => 'nullable|string|in:duplicate,fraudulent,requested_by_customer',
         ]);
 
+        Log::info($id);
         try {
-            $paymentRecord = PaymentRecord::findOrFail($request->payment_id);
+            $paymentRecord = PaymentRecord::findOrFail($id);
+            Log::info($paymentRecord);
+            $request->amount = $paymentRecord->amount;
+            Log::info('paymentRecord', ['amount' => $request->amount]);
 
-            $refundAmount = $request->amount ? intval($request->amount * 100) : null;
+            $refundAmount = $request->amount ?? 0;
 
+
+            Log::info($paymentRecord->stripe_payment_intent_id);
+
+            // $paymentIntent = $this->stripe->paymentIntents->retrieve(
+            //     $paymentRecord->stripe_payment_intent_id,
+            //     ['stripe_account' => $paymentRecord->stripe_account_id]
+            // );
+
+            $paymentIntent = $this->stripe->paymentIntents->retrieve(
+                $paymentRecord->stripe_payment_intent_id,
+            );
+
+            // Log::info($paymentIntent);
+            if ($paymentIntent->status !== 'succeeded') {
+                throw new \Exception('Payment is not captured yet, cannot refund.');
+            }
+
+            // Create refund
             $refund = $this->stripe->refunds->create([
                 'payment_intent' => $paymentRecord->stripe_payment_intent_id,
                 'amount' => $refundAmount,
@@ -235,6 +247,9 @@ class PayinDemoController extends Controller
                     'payment_record_id' => $paymentRecord->id,
                 ],
             ]);
+
+            Log::info($refund);
+
 
             $paymentRecord->update([
                 'status' => 'refunded',
@@ -245,17 +260,9 @@ class PayinDemoController extends Controller
                 ]),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'refund_id' => $refund->id,
-                'refund_amount' => $refund->amount / 100,
-                'message' => 'Payment refunded successfully',
-            ]);
+            return redirect()->back()->with('success', 'Payment refunded successfully.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 400);
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -278,7 +285,27 @@ class PayinDemoController extends Controller
         }
     }
 
-    function retrieveTransaction(Request $request, $id)
+    // function retrieveTransaction(Request $request, $id)
+    // {
+    //     try {
+    //         // $transaction = $this->stripe->paymentIntents->retrieve($id);
+    //         $transaction = $this->stripe->paymentIntents->all([
+    //             'destination' => $accountId,
+    //             'limit' => $limit,
+    //         ]);
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => $transaction,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'error' => $e->getMessage(),
+    //         ], 400);
+    //     }
+    // }
+
+    function retrieveTransactionForCustomerId(Request $request, $id)
     {
         try {
             $transaction = $this->stripe->paymentIntents->retrieve($id);
